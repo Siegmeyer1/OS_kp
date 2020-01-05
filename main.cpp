@@ -3,7 +3,6 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <cstdlib>
-#include <ctime>
 #include <thread>
 #include <condition_variable>
 #include <mutex>
@@ -32,11 +31,7 @@ void black_n_white(unsigned int &start, unsigned int &end, unsigned char* mappin
     unsigned char tmp = 0;
 
     for (int i = st; i < nd; i+=3) {
-        //tmp = 0;
         tmp = (unsigned char)((mapping[i] + mapping[i+1] + mapping[i+2])/3);
-        //tmp += mapping[i]/3;
-        //tmp += mapping[i+1]/3;
-        //tmp += mapping[i+2]/3;
 
         mapping[i] = tmp;
         mapping[i+1] = tmp;
@@ -46,7 +41,7 @@ void black_n_white(unsigned int &start, unsigned int &end, unsigned char* mappin
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        std::cout << "USAGE: ./main <file.pmp> <number of threads>\n";
+        std::cout << "USAGE: ./main <file.pmp> <number of threads> <filter option>\n";
         return -1;
     }
 
@@ -86,7 +81,6 @@ int main(int argc, char* argv[]) {
     }
     uint32_t n_of_thrs;
     int filter_type;
-    //std::cin >> n_of_thrs;
     n_of_thrs = atoi(argv[2]);
     filter_type = atoi(argv[3]);
     if (n_of_thrs > height) n_of_thrs = height;
@@ -100,9 +94,6 @@ int main(int argc, char* argv[]) {
     uint32_t leftover = (height % n_of_thrs) * width * 3;
     uint32_t start = m_offset;
     uint32_t end = m_offset + pool;
-
-    std::cout << n_of_thrs << " threads, each contains " << pool << " bytes\n";
-    unsigned int start_time = clock();
 
     std::unique_lock<std::mutex> lock(mutex);
     if (filter_type == 1) {
@@ -131,9 +122,5 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < n_of_thrs; i++) {
         threads[i].join();
     }
-    unsigned int end_time = clock();
-    std::cout << "processing took " << (end_time - start_time) << " ticks\n";
-
-
     return 0;
 }
